@@ -1,20 +1,17 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing (if necessary) the data 
-```{r, echo=TRUE}
+
+```r
 data <- read.csv("activity.csv")
 ```
 
 ## What is mean total number of steps taken per day?
 
 #### 1. Calculate the total number of steps taken per day
-```{r, echo=TRUE,message=FALSE}
+
+```r
 # load necessary packages & convert data into a tbl for dplyr
 library(dplyr)
 library(ggplot2)
@@ -30,7 +27,8 @@ byday <- summarize(byday, totalSteps = sum(steps,na.rm=TRUE))
 ```
 
 #### 2. construct histogram of the total number of steps taken each day
-```{r, echo=TRUE}
+
+```r
 qplot(byday$totalSteps, geom = "histogram",binwidth=2000, 
       main = "Frequency of Total Steps per Day", xlab = "Number of steps", 
       ylab = "Number of Days (frequency)", fill = I("blue"), col = I("gold"),
@@ -39,10 +37,24 @@ qplot(byday$totalSteps, geom = "histogram",binwidth=2000,
     scale_y_continuous(breaks=1:16)
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
+
 #### 3. mean & median of the total number of steps taken per day
-```{r, echo=TRUE}
+
+```r
 mean(byday$totalSteps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(byday$totalSteps)
+```
+
+```
+## [1] 10765
 ```
 
 
@@ -50,7 +62,8 @@ median(byday$totalSteps)
 
 #### 1. Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r, echo=TRUE}
+
+```r
 data <- tbl_df(data)
 
 # group the data, by time interval
@@ -66,11 +79,18 @@ plot(byinterval$interval,byinterval$avgSteps,type="l", xlab="Interval",
      main="Time Series: Average Steps vs. Time Interval",ylab="Average Steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
 #### 2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
-```{r, echo=TRUE}
+
+```r
 maxindex <- which(byinterval$avgSteps == max(byinterval$avgSteps))
 as.numeric(byinterval[maxindex,1])
+```
+
+```
+## [1] 835
 ```
 
 
@@ -78,14 +98,20 @@ as.numeric(byinterval[maxindex,1])
 
 #### 1. Calculate and report the total number of missing values in the dataset
 
-```{r,echo=TRUE}
+
+```r
 missings <- which(is.na(data$steps))
 length(missings)
 ```
 
+```
+## [1] 2304
+```
+
 #### 2 & 3. Devise a strategy for filling in all of the missing values in the dataset, then actually fill them in. My strategy is to use the mean of each 5-minute interval. 
 
-```{r,echo=TRUE}
+
+```r
 data <- tbl_df(data)
 
 # group the data, by time interval
@@ -105,7 +131,8 @@ byint3 <- as.data.frame(byint2)
 ```
 
 #### 4. Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day
-```{r, echo=TRUE,message=FALSE}
+
+```r
 # group the data, by day
 byday <- tbl_df(byint3)
 byday <- group_by(byday, date)
@@ -117,9 +144,24 @@ qplot(byday$totalSteps, geom = "histogram",binwidth=2000,
       alpha=I(.5)) +
     scale_x_continuous(breaks=seq(0,22000,by=2000))+
     scale_y_continuous(breaks=seq(0,24,by=2))
+```
 
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
+
+```r
 mean(byday$totalSteps)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(byday$totalSteps)
+```
+
+```
+## [1] 10766.19
 ```
 As we can see from the output, only the *median* value differers from the estimates from the first part of the assignment. However, this difference is of very small magnitude. Thus, the impact of the strategy I used for imputing missing data on the estimates of the total daily number of steps was **minimal**
 
@@ -127,7 +169,8 @@ As we can see from the output, only the *median* value differers from the estima
 
 #### 1. Create a new factor variable in the dataset with two levels – “weekday” and “weekend” indicating whether a given date is a weekday or weekend day.
 
-```{r,echo=TRUE}
+
+```r
 # convert dates to class Date.
 byint3$date <- as.character(byint3$date)
 byint3$date <- as.Date(byint3$date, "%Y-%m-%d")
@@ -146,8 +189,8 @@ byint3$weekdays <- factor(byint3$weekdays)
 
 #### 2. Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
 
-```{r,echo=TRUE}
 
+```r
 # group the data, by time interval
 byinterval <- group_by(tbl_df(byint3), interval, weekdays)
 byinterval$steps <- unlist(byinterval$steps) # convert steps var to numeric
@@ -161,3 +204,5 @@ ggplot(byinterval, aes(x = interval, y = avgSteps)) +
            labs(x="Interval",y="Average Steps") + 
            labs(title="Time Series: Average Steps vs. Time Interval")    
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
